@@ -19,7 +19,9 @@ x64/
 x86/
 build/
 bld/
-[Bb]in/
+[Bb]in/*
+!bin/Okta.Tools.UserExporter.exe
+!bin/Okta.Tools.UserExporter.exe.config
 [Oo]bj/
 
 # Visual Studio 2015 cache/options directory
