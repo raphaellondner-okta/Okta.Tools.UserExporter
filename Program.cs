@@ -4,10 +4,12 @@ using Okta.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Okta.Tools.UserExporter
 {
@@ -50,9 +52,15 @@ namespace Okta.Tools.UserExporter
 
                 do
                 {
-                    users = usersClient.GetList(pageSize: 200, nextPage: nextPage);
-                    
-                    
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    users = usersClient.GetList(pageSize: 100, nextPage: nextPage);
+                    stopWatch.Stop();
+                    TimeSpan ts = stopWatch.Elapsed;
+                    Console.WriteLine("Getting 100 users in {0} s", ts.TotalSeconds);
+
+                    stopWatch.Reset();
+                    stopWatch.Start();
                     foreach (var user in users.Results)
                     {
                         string line = string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\",\"{5}\",\"{6}\",\"{7}\",\"{8}\",\"{9}\",\"{10}\",\"{11}\",\"{12}\",\"{13}\"", user.Id, user.Profile.Login, user.Status, user.Created, user.Activated, user.LastLogin, user.LastUpdated, user.PasswordChanged, user.StatusChanged, user.Profile.FirstName, user.Profile.LastName, user.Profile.Email, user.Profile.SecondaryEmail, user.Profile.MobilePhone);
@@ -73,10 +81,15 @@ namespace Okta.Tools.UserExporter
                         sw.Flush();
 
                     }
+                    stopWatch.Stop();
+                    ts = stopWatch.Elapsed;
+                    Console.WriteLine("Writing 100 users to the file in {0} s", ts.TotalSeconds);
 
                     nextPage = users.NextPage;
                 }
                 while (!users.IsLastPage);
+                Console.WriteLine("All your users were exported to the file. Please press Enter to exit.");
+                Console.ReadLine();
             }
             catch(Exception ex)
             {
